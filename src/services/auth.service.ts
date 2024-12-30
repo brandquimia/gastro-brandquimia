@@ -1,40 +1,32 @@
+import { auth } from '../config/firebase';
 import { 
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    signOut,
-    updateProfile
-  } from 'firebase/auth';
-  import { doc, setDoc, getDoc } from 'firebase/firestore';
-  import { auth, db } from '../config/firebase';
-  import { User } from '../types/auth';
-  
-  export const authService = {
-    async signIn(email: string, password: string) {
-      const credential = await signInWithEmailAndPassword(auth, email, password);
-      const userDoc = await getDoc(doc(db, 'users', credential.user.uid));
-      return userDoc.data() as User;
-    },
-  
-    async signUp(email: string, password: string, firstName: string, lastName: string) {
-      const credential = await createUserWithEmailAndPassword(auth, email, password);
-      const user: User = {
-        id: credential.user.uid,
-        email,
-        firstName,
-        lastName,
-        role: 'staff', // default role
-        createdAt: new Date()
-      };
-      
-      await setDoc(doc(db, 'users', user.id), user);
-      await updateProfile(credential.user, {
-        displayName: `${firstName} ${lastName}`
-      });
-      
-      return user;
-    },
-  
-    async signOut() {
-      await signOut(auth);
-    }
-  };
+  signInWithEmailAndPassword, 
+  signOut as firebaseSignOut,
+  User as FirebaseUser 
+} from 'firebase/auth';
+import { createUserProfile } from './userService';
+import { UserRole } from '../types/user';
+
+interface AuthUser {
+  uid: string;
+  email: string | null;
+  role: UserRole;
+}
+
+export const signIn = async (email: string, password: string): Promise<FirebaseUser> => {
+  const result = await signInWithEmailAndPassword(auth, email, password);
+  if (result.user.email) {
+    await createUserProfile(result.user.uid, result.user.email);
+  }
+  return result.user;
+};
+
+export const signOut = async (): Promise<void> => {
+  await firebaseSignOut(auth);
+};
+
+export const authService = {
+  async getCurrentUser(): Promise<AuthUser | null> {
+    return auth.currentUser as AuthUser | null;
+  }
+};

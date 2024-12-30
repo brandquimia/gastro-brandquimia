@@ -1,0 +1,14 @@
+[
+  {
+    "origin": ["http://localhost:3000", "https://gastro-brandquimia.web.app"],
+    "method": ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"],
+    "responseHeader": [
+      "Content-Type",
+      "Access-Control-Allow-Origin",
+      "Access-Control-Allow-Methods",
+      "Access-Control-Allow-Headers",
+      "Authorization"
+    ],
+    "maxAgeSeconds": 3600
+  }
+] 

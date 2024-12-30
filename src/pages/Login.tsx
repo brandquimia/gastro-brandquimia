@@ -1,22 +1,24 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
-const Login = () => {
+export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setError('');
       await signIn(email, password);
-      navigate('/');
+      console.log('Login exitoso:', user); // Debug
+      navigate('/dashboard');
     } catch (err) {
-      setError('Error al iniciar sesión. Verifica tus credenciales.');
-      console.error(err);
+      console.error('Error en login:', err); // Debug
+      setError('Error al iniciar sesión');
     }
   };
 
@@ -30,9 +32,7 @@ const Login = () => {
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
+            <div className="text-red-500 text-center">{error}</div>
           )}
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
@@ -40,7 +40,7 @@ const Login = () => {
                 type="email"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Correo electrónico"
+                placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -69,6 +69,4 @@ const Login = () => {
       </div>
     </div>
   );
-};
-
-export default Login;
+}
